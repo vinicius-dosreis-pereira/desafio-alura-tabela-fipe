@@ -1,11 +1,12 @@
 package com.example.desafio.tabela_fipe.principal;
 
-import com.example.desafio.tabela_fipe.model.Carro;
+import com.example.desafio.tabela_fipe.model.Veiculo;
 import com.example.desafio.tabela_fipe.model.Dados;
 import com.example.desafio.tabela_fipe.model.Modelos;
 import com.example.desafio.tabela_fipe.service.ConsumoApi;
 import com.example.desafio.tabela_fipe.service.ConversorDados;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
@@ -75,33 +76,32 @@ public class Principal {
                 .filter(m -> m.nome().toLowerCase().contains(nomeVeiculo.toLowerCase()))
                 .collect(Collectors.toList());
 
-        modelosBuscados.stream().sorted(Comparator.comparing(Dados::nome)).forEach(System.out::println);
+        modelosBuscados.forEach(System.out::println);
 //        listando os modelos buscados por nome
 
 //        modelosBuscados.stream().sorted(Comparator.comparing(Dados::codigo)).forEach(System.out::println);
 //        listando os modelos por codigo
 
-        System.out.println("\nDigite o código do modelo específico que deseja ver: ");
-        var codigoVeiculo = leitura.nextLine();
+        System.out.println("Digite por favor o código do modelo para buscar os valores de avaliação");
+        var codigoModelo = leitura.nextLine();
 
-        endereco += "/" + codigoVeiculo + "/anos";
+        endereco = endereco + "/" + codigoModelo + "/anos";
         json = consumo.obterDados(endereco);
-        var anosList = conversorDados.obterLista(json, Dados.class);
+        List<Dados> anos = conversorDados.obterLista(json, Dados.class);
+        List<Veiculo> veiculos = new ArrayList<>();
 
-        System.out.println("\nModelo buscado: ");
-        anosList.stream().sorted(Comparator.comparing(Dados::nome).reversed()).forEach(System.out::println);
+        for (int i = 0; i < anos.size(); i++) {
+            var enderecoAnos = endereco + "/" + anos.get(i).codigo();
+            json = consumo.obterDados(enderecoAnos);
+            Veiculo veiculo = conversorDados.obterDados (json, Veiculo.class);
+            veiculos.add(veiculo);
+        }
 
-        System.out.println("\nDigite agora o código específico referente ao ano específico que deseja buscar: ");
-        var anoVeiculo = leitura.nextLine();
-
-        endereco += "/" + anoVeiculo;
-        json = consumo.obterDados(endereco);
-        var anoBuscado = conversorDados.obterDados(json, Carro.class);
-
-        System.out.println("\n" + anoBuscado);
+        System.out.println("\nTodos os veiculos filtrados com avaliações por ano: ");
+        veiculos.forEach(System.out::println);
 
         System.out.println("\nMuito obrigado por utilizar o sistema!");
-    }
 
+    }
 
 }
